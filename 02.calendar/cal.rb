@@ -1,4 +1,5 @@
 require "date"
+require "optparse"
 
 First_day = 1
 Calendar_width = 20
@@ -60,5 +61,20 @@ def show_calendar(year, month)
   print "\n" * (Calendar_lines - n_lines)
 end
 
-show_this_month_calendar
-show_calendar(2022, 1)
+params = ARGV.getopts("y:m:")
+year = params["y"]
+month = params["m"]
+
+if year.nil?
+  year = Date.today.year
+else
+  year = year.to_i
+end
+
+if month.nil?
+  month = Date.today.mon
+else
+  month = month.to_i
+end
+
+show_calendar(year, month)
