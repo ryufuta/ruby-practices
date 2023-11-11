@@ -48,12 +48,20 @@ def validate_params(params)
     year = Date.today.year
   else
     year = year.to_i
+    if !year.between?(1, 9999)
+      puts "year `#{params["y"]}' not in range 1..9999"
+      exit 1
+    end
   end
   
   if month.nil?
     month = Date.today.mon
   else
     month = month.to_i
+    if !month.between?(1, 12)
+      puts "month `#{params["m"]}' not in range 1..12"
+      exit 1
+    end
   end
 
   params["y"] = year
