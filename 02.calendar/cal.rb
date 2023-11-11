@@ -17,8 +17,9 @@ def show_calendar(year, month)
   print " " * 3 * first_day_of_week
   day_of_week = first_day_of_week
   n_lines = 3
+  today = Date.today
   (First_day..last_day).each do |day|
-    print "#{day}".rjust(2)
+    print_day(day, year, month, today)
     if day_of_week == Saturday
       print "\n"
       day_of_week = 0
@@ -30,6 +31,14 @@ def show_calendar(year, month)
   end
 
   print "\n" * (Calendar_lines - n_lines)
+end
+
+def print_day(day, year, month, today)
+  if year == today.year && month == today.mon && day == today.day
+    print "\e[30m\e[47m#{day}\e[0m".rjust(2)
+  else
+    print "#{day}".rjust(2)
+  end
 end
 
 params = ARGV.getopts("y:m:")
