@@ -41,20 +41,29 @@ def print_day(day, year, month, today)
   end
 end
 
+def validate_params(params)
+  year = params["y"]
+  month = params["m"]
+  if year.nil?
+    year = Date.today.year
+  else
+    year = year.to_i
+  end
+  
+  if month.nil?
+    month = Date.today.mon
+  else
+    month = month.to_i
+  end
+
+  params["y"] = year
+  params["m"] = month
+  return params
+end
+
 params = ARGV.getopts("y:m:")
+params = validate_params params
 year = params["y"]
 month = params["m"]
-
-if year.nil?
-  year = Date.today.year
-else
-  year = year.to_i
-end
-
-if month.nil?
-  month = Date.today.mon
-else
-  month = month.to_i
-end
 
 show_calendar(year, month)
