@@ -1,4 +1,5 @@
 #!/usr/bin/env ruby
+# frozen_string_literal: true
 
 score = ARGV[0]
 socres = score.split(',')
@@ -22,12 +23,10 @@ frames.each.with_index do |frame, i|
   frame_sum = frame.sum
   point += frame_sum
   if frame[0] == 10
-    point += frames[i+1].sum
-    if frames[i+1][0] == 10
-      point += frames[i+2][0]
-    end
+    point += frames[i + 1].sum
+    point += frames[i + 2][0] if frames[i + 1][0] == 10
   elsif frame_sum == 10
-    point += frames[i+1][0]
+    point += frames[i + 1][0]
   end
   break if i == 9
 end
