@@ -30,4 +30,4 @@ frames.each.with_index do |frame, i|
   end
   break if i == 9
 end
-p point
+puts point
