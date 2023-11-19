@@ -18,13 +18,17 @@ shots.each_slice(2) do |s|
 end
 
 point = 0
-frames.each do |frame|
+frames.each.with_index do |frame, i|
+  frame_sum = frame.sum
+  point += frame_sum
   if frame[0] == 10
-    point += 30
-  elsif frame.sum == 10
-    point += frame[0] + 10
-  else
-    point += frame.sum
+    point += frames[i+1].sum
+    if frames[i+1][0] == 10
+      point += frames[i+2][0]
+    end
+  elsif frame_sum == 10
+    point += frames[i+1][0]
   end
+  break if i == 9
 end
 p point
