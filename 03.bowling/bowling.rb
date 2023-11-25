@@ -2,9 +2,9 @@
 # frozen_string_literal: true
 
 score = ARGV[0]
-socres = score.split(',')
+scores = score.split(',')
 shots = []
-socres.each do |s|
+scores.each do |s|
   if s == 'X'
     shots << 10
     shots << 0
