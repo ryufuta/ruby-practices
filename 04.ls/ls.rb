@@ -5,7 +5,13 @@
 file_names = Dir.glob('*')
 
 # 列幅調整
-file_names = file_names.map { |file_name| file_name.ljust(16) }
+# 半角16文字の列幅にする。全角文字は2文字分の幅のためその分短くする
+column_width = 16
+file_names = file_names.map do |file_name|
+  # 全角文字をいくつ含むか
+  n_full_widths = file_name.scan(/[^\x01-\x7E\uFF65-\uFF9F]/).size
+  file_name.ljust(column_width - n_full_widths)
+end
 
 # ファイル数が３の倍数になるように末尾に空文字追加
 file_names += [''] * (3 - file_names.size % 3) unless (file_names.size % 3) == 0
