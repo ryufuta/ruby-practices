@@ -5,6 +5,8 @@ def main
   # カレントディレクトリのファイルエントリ取得
   file_names = Dir.glob('*')
 
+  return if file_names.empty?
+
   file_names = justify_columns(file_names)
   puts to_ls_text(file_names)
 end
