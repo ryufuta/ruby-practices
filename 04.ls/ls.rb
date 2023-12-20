@@ -20,7 +20,7 @@ end
 
 def to_ls_text(file_names, n_columns = 3)
   # ファイル数が列数の倍数になるように末尾に空文字追加
-  file_names += [''] * (n_columns - file_names.size % n_columns) unless (file_names.size % n_columns) == 0
+  file_names += [''] * (n_columns - file_names.size % n_columns) unless (file_names.size % n_columns).zero?
 
   # 上から下、左から右へ昇順、指定した列数になるように表示
   ls_text = ''
