@@ -2,7 +2,6 @@
 # frozen_string_literal: true
 
 def main
-  # カレントディレクトリのファイルエントリ取得
   file_names = Dir.glob('*')
 
   return if file_names.empty?
