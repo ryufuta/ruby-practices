@@ -2,6 +2,7 @@
 # frozen_string_literal: true
 
 COLUMN_WIDTH_UNIT = 8
+N_COLUMNS = 3
 
 def main
   file_names = Dir.glob('*')
@@ -28,15 +29,15 @@ def count_full_width_chars(str)
   str.scan(/[^\x01-\x7E\uFF65-\uFF9F]/).size
 end
 
-def to_ls_text(file_names, n_columns = 3)
+def to_ls_text(file_names)
   # ファイル数が列数の倍数になるように末尾に空文字追加
-  file_names += [''] * (n_columns - file_names.size % n_columns) unless (file_names.size % n_columns).zero?
+  file_names += [''] * (N_COLUMNS - file_names.size % N_COLUMNS) unless (file_names.size % N_COLUMNS).zero?
 
   # 上から下、左から右へ昇順、指定した列数になるように表示
   ls_text = ''
-  n_rows = file_names.size / n_columns
+  n_rows = file_names.size / N_COLUMNS
   n_rows.times do |row|
-    n_columns.times { |col| ls_text += file_names[row + n_rows * col] }
+    N_COLUMNS.times { |col| ls_text += file_names[row + n_rows * col] }
     ls_text += "\n"
   end
   ls_text
