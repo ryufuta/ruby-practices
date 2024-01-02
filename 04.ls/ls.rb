@@ -15,12 +15,13 @@ end
 
 def justify_columns(file_names)
   # 全角文字は2文字分カウント
-  max_name_length = file_names.map { |file_name| file_name.size + count_full_width_chars(file_name) }.max
+  file_names_with_length = file_names.map { |file_name| [file_name, file_name.size + count_full_width_chars(file_name)] }
+  max_name_length = file_names_with_length.map { |_, length| length }.max
 
   column_width = ceil_to_multiple(max_name_length + 1, COLUMN_WIDTH_UNIT)
 
   # 全角文字は2文字分の幅のためその分短くする
-  file_names.map { |file_name| file_name.ljust(column_width - count_full_width_chars(file_name)) }
+  file_names_with_length.map { |file_name, length| file_name.ljust(column_width - length + file_name.size) }
 end
 
 def count_full_width_chars(str)
