@@ -18,7 +18,7 @@ def justify_columns(file_names)
   file_names_with_length = file_names.map { |file_name| [file_name, file_name.size + count_full_width_chars(file_name)] }
   max_name_length = file_names_with_length.map { |_, length| length }.max
 
-  column_width = ceil_to_multiple(max_name_length + 1, COLUMN_WIDTH_UNIT)
+  column_width = (max_name_length + 1).ceildiv(COLUMN_WIDTH_UNIT) * COLUMN_WIDTH_UNIT
 
   # 全角文字は2文字分の幅のためその分短くする
   file_names_with_length.map { |file_name, length| file_name.ljust(column_width - length + file_name.size) }
@@ -30,7 +30,7 @@ end
 
 def to_ls_text(file_names)
   # ファイル数が列数の倍数になるように末尾に空文字追加
-  file_names += [''] * (ceil_to_multiple(file_names.size, N_COLUMNS) - file_names.size)
+  file_names += [''] * (file_names.size.ceildiv(N_COLUMNS) * N_COLUMNS - file_names.size)
 
   # 上から下、左から右へ昇順、指定した列数になるように表示
   ls_text = ''
@@ -40,10 +40,6 @@ def to_ls_text(file_names)
     ls_text += "\n"
   end
   ls_text
-end
-
-def ceil_to_multiple(number, divisor)
-  number.ceildiv(divisor) * divisor
 end
 
 main if __FILE__ == $PROGRAM_NAME
