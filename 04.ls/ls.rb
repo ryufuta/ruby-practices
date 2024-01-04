@@ -1,11 +1,14 @@
 #!/usr/bin/env ruby
 # frozen_string_literal: true
 
+require 'optparse'
+
 COLUMN_WIDTH_UNIT = 8
 N_COLUMNS = 3
 
 def main
-  file_names = Dir.glob('*')
+  options = ARGV.getopts('a')
+  file_names = options['a'] ? Dir.entries('.').sort : Dir.glob('*')
 
   return if file_names.empty?
 
