@@ -7,8 +7,9 @@ COLUMN_WIDTH_UNIT = 8
 N_COLUMNS = 3
 
 def main
-  options = ARGV.getopts('a')
+  options = ARGV.getopts('ar')
   file_names = options['a'] ? Dir.entries('.').sort : Dir.glob('*')
+  file_names = file_names.reverse if options['r']
 
   return if file_names.empty?
 
