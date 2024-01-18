@@ -7,6 +7,25 @@ require 'optparse'
 
 COLUMN_WIDTH_UNIT = 8
 N_COLUMNS = 3
+FILE_TYPE_OCT_TO_SYMBOLIC = {
+  '01' => 'p',
+  '02' => 'c',
+  '04' => 'd',
+  '06' => 'b',
+  '10' => '-',
+  '12' => 'l',
+  '14' => 's'
+}.freeze
+PERMISSION_OCT_TO_SYMBOLIC = {
+  '0' => '---',
+  '1' => '--x',
+  '2' => '-w-',
+  '3' => '-wx',
+  '4' => 'r--',
+  '5' => 'r-x',
+  '6' => 'rw-',
+  '7' => 'rwx'
+}.freeze
 
 def main
   options = ARGV.getopts('alr')
@@ -62,30 +81,10 @@ end
 
 def to_symbolic_notation(mode)
   mode_text = mode.to_s(8).rjust(6, '0')
-  file_type_oct_to_symbolic = {
-    '01' => 'p',
-    '02' => 'c',
-    '04' => 'd',
-    '06' => 'b',
-    '10' => '-',
-    '12' => 'l',
-    '14' => 's'
-  }
-  file_type = file_type_oct_to_symbolic[mode_text[0, 2]]
-
-  permission_oct_to_symbolic = {
-    '0' => '---',
-    '1' => '--x',
-    '2' => '-w-',
-    '3' => '-wx',
-    '4' => 'r--',
-    '5' => 'r-x',
-    '6' => 'rw-',
-    '7' => 'rwx'
-  }
-  owner_permission = permission_oct_to_symbolic[mode_text[3]]
-  group_permission = permission_oct_to_symbolic[mode_text[4]]
-  other_permission = permission_oct_to_symbolic[mode_text[5]]
+  file_type = FILE_TYPE_OCT_TO_SYMBOLIC[mode_text[0, 2]]
+  owner_permission = PERMISSION_OCT_TO_SYMBOLIC[mode_text[3]]
+  group_permission = PERMISSION_OCT_TO_SYMBOLIC[mode_text[4]]
+  other_permission = PERMISSION_OCT_TO_SYMBOLIC[mode_text[5]]
 
   case mode_text[2]
   when '1'
