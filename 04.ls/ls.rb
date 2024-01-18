@@ -35,12 +35,13 @@ def to_ls_l_text(file_names)
   max_digit_file_size = attributes_by_type[6].max.to_s.size
 
   attributes_by_file.sum("total #{total_blocks}\n") do |file_attributes|
-    file_attributes[1] + (file_attributes[2] || ' ') + ' ' +
-      file_attributes[3].to_s.rjust(max_digit_links) + ' ' +
-      file_attributes[4].ljust(max_owner_name_length) + '  ' +
-      file_attributes[5].ljust(max_group_name_length) + '  ' +
-      file_attributes[6].to_s.rjust(max_digit_file_size) + ' ' +
-      file_attributes[7] + ' ' + file_attributes[8] + "\n"
+    "#{file_attributes[1]}#{file_attributes[2] || ' '} "\
+    "#{file_attributes[3].to_s.rjust(max_digit_links)} "\
+    "#{file_attributes[4].ljust(max_owner_name_length)}  "\
+    "#{file_attributes[5].ljust(max_group_name_length)}  "\
+    "#{file_attributes[6].to_s.rjust(max_digit_file_size)} "\
+    "#{file_attributes[7]} "\
+    "#{file_attributes[8]}\n"
   end
 end
 
