@@ -45,7 +45,7 @@ def main
 end
 
 def to_ls_l_text(file_names)
-  attributes_by_file = file_names.map { |file_name| fetch_file_attributes(file_name) }
+  attributes_by_file = file_names.map { |file_name| fetch_file_attributes(file_name, !`which xattr`.empty?) }
   attributes_by_type = attributes_by_file.transpose
   total_blocks = attributes_by_type[0].sum
   max_digit_links = attributes_by_type[3].max.to_s.size
@@ -64,12 +64,12 @@ def to_ls_l_text(file_names)
   end
 end
 
-def fetch_file_attributes(file_name)
+def fetch_file_attributes(file_name, xattr_found)
   file_attributes = File.lstat(file_name)
   [
     file_attributes.blocks,
     to_symbolic_notation(file_attributes.mode),
-    `xattr -s #{file_name}`.empty? ? nil : '@',
+    xattr_found && !`xattr -s #{file_name}`.empty? ? '@' : nil,
     file_attributes.nlink,
     Etc.getpwuid(file_attributes.uid).name,
     Etc.getgrgid(file_attributes.gid).name,
