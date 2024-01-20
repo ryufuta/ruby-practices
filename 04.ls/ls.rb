@@ -27,6 +27,8 @@ PERMISSION_OCT_TO_SYMBOLIC = {
   '7' => 'rwx'
 }.freeze
 
+FileAttribute = Data.define(:blocks, :file_type_with_permissions, :xattr, :nlinks, :owner_name, :group_name, :size, :updated_at, :file_name)
+
 def main
   options = ARGV.getopts('alr')
   file_names = options['a'] ? Dir.entries('.').sort : Dir.glob('*')
@@ -46,27 +48,22 @@ end
 
 def to_ls_l_text(file_names)
   attributes_by_file = file_names.map { |file_name| fetch_file_attributes(file_name, !`which xattr`.empty?) }
-  attributes_by_type = attributes_by_file.transpose
-  total_blocks = attributes_by_type[0].sum
-  max_digit_links = attributes_by_type[3].max.to_s.size
-  max_owner_name_length = attributes_by_type[4].map(&:size).max
-  max_group_name_length = attributes_by_type[5].map(&:size).max
-  max_digit_file_size = attributes_by_type[6].max.to_s.size
-
+  total_blocks, max_digit_links, max_owner_name_length, max_group_name_length, max_digit_file_size =
+    calculate_total_blocks_and_column_widths(attributes_by_file)
   attributes_by_file.sum("total #{total_blocks}\n") do |file_attributes|
-    "#{file_attributes[1]}#{file_attributes[2] || ' '} "\
-    "#{file_attributes[3].to_s.rjust(max_digit_links)} "\
-    "#{file_attributes[4].ljust(max_owner_name_length)}  "\
-    "#{file_attributes[5].ljust(max_group_name_length)}  "\
-    "#{file_attributes[6].to_s.rjust(max_digit_file_size)} "\
-    "#{file_attributes[7]} "\
-    "#{file_attributes[8]}\n"
+    "#{file_attributes.file_type_with_permissions}#{file_attributes.xattr || ' '} "\
+    "#{file_attributes.nlinks.to_s.rjust(max_digit_links)} "\
+    "#{file_attributes.owner_name.ljust(max_owner_name_length)}  "\
+    "#{file_attributes.group_name.ljust(max_group_name_length)}  "\
+    "#{file_attributes.size.to_s.rjust(max_digit_file_size)} "\
+    "#{file_attributes.updated_at} "\
+    "#{file_attributes.file_name}\n"
   end
 end
 
 def fetch_file_attributes(file_name, xattr_found)
   file_attributes = File.lstat(file_name)
-  [
+  FileAttribute.new(
     file_attributes.blocks,
     to_symbolic_notation(file_attributes.mode),
     xattr_found && !`xattr -s #{file_name}`.empty? ? '@' : nil,
@@ -76,7 +73,7 @@ def fetch_file_attributes(file_name, xattr_found)
     file_attributes.size,
     format_timestamp(file_attributes.mtime),
     file_attributes.symlink? ? "#{file_name} -> #{File.readlink(file_name)}" : file_name
-  ]
+  )
 end
 
 def to_symbolic_notation(mode)
@@ -104,6 +101,16 @@ def format_timestamp(timestamp)
   else
     timestamp.strftime('%_2m %_2d %_5Y')
   end
+end
+
+def calculate_total_blocks_and_column_widths(attributes_by_file)
+  [
+    attributes_by_file.sum(&:blocks),
+    attributes_by_file.map(&:nlinks).max.to_s.size,
+    attributes_by_file.map { |file_attributes| file_attributes.owner_name.size }.max,
+    attributes_by_file.map { |file_attributes| file_attributes.group_name.size }.max,
+    attributes_by_file.map(&:size).max.to_s.size
+  ]
 end
 
 def justify_columns(file_names)
