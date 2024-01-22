@@ -47,7 +47,8 @@ def main
 end
 
 def to_ls_l_text(file_names)
-  attributes_by_file = file_names.map { |file_name| fetch_file_attributes(file_name, !`which xattr`.empty?) }
+  xattr_found = system('which xattr', out: '/dev/null', err: '/dev/null')
+  attributes_by_file = file_names.map { |file_name| fetch_file_attributes(file_name, xattr_found) }
   total_blocks, max_digit_links, max_owner_name_length, max_group_name_length, max_digit_file_size =
     calculate_total_blocks_and_column_widths(attributes_by_file)
   attributes_by_file.sum("total #{total_blocks}\n") do |file_attributes|
