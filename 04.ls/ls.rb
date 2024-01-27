@@ -4,6 +4,7 @@
 require 'date'
 require 'etc'
 require 'optparse'
+require 'open3'
 
 COLUMN_WIDTH_UNIT = 8
 N_COLUMNS = 3
@@ -67,7 +68,7 @@ def fetch_file_attributes(file_name, xattr_found)
   FileAttribute.new(
     file_attributes.blocks,
     to_symbolic_notation(file_attributes.mode),
-    xattr_found && !`xattr -s #{file_name}`.empty? ? '@' : nil,
+    xattr_found && !Open3.capture3("xattr -s #{file_name}")[0].empty? ? '@' : nil,
     file_attributes.nlink,
     Etc.getpwuid(file_attributes.uid).name,
     Etc.getgrgid(file_attributes.gid).name,
