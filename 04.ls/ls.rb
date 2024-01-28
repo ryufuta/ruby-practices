@@ -32,8 +32,23 @@ FileAttribute = Data.define(:blocks, :file_type_with_permissions, :xattr, :nlink
 
 def main
   options = ARGV.getopts('alr')
-  file_names = options['a'] ? Dir.entries('.').sort : Dir.glob('*')
-  file_names = file_names.reverse if options['r']
+  if ARGV.empty?
+    file_names = options['a'] ? Dir.entries('.').sort : Dir.glob('*')
+    file_names = file_names.reverse if options['r']
+  else
+    path = ARGV[0]
+    if File.exist?(path)
+      if File.directory?(path)
+        file_names = Dir.entries(path).sort
+        file_names = file_names.reject { |file_name| file_name[0] == '.' } unless options['a']
+        file_names = file_names.reverse if options['r']
+      else
+        file_names = [path]
+      end
+    else
+      return puts "ls: #{path}: No such file or directory"
+    end
+  end
 
   if options['l']
     return puts 'total 0' if file_names.empty?
