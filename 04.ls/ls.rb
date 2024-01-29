@@ -35,30 +35,53 @@ def main
   if ARGV.empty?
     file_names = options['a'] ? Dir.entries('.').sort : Dir.glob('*')
     file_names = file_names.reverse if options['r']
-  else
-    path = ARGV[0]
-    if File.exist?(path)
-      if File.directory?(path)
-        file_names = Dir.entries(path).sort
-        file_names = file_names.reject { |file_name| file_name[0] == '.' } unless options['a']
-        file_names = file_names.reverse if options['r']
-      else
-        file_names = [path]
-      end
+    if options['l']
+      return puts 'total 0' if file_names.empty?
+
+      puts to_ls_l_text(file_names)
     else
-      return puts "ls: #{path}: No such file or directory"
+      return if file_names.empty?
+
+      file_names = justify_columns(file_names)
+      puts to_ls_text(file_names)
     end
-  end
-
-  if options['l']
-    return puts 'total 0' if file_names.empty?
-
-    puts to_ls_l_text(file_names)
   else
-    return if file_names.empty?
+    file_paths_not_found = []
+    file_paths = []
+    file_names_by_dir = {}
+    ARGV.each do |path|
+      if File.exist?(path)
+        if File.directory?(path)
+          file_names = Dir.entries(path).sort
+          file_names = file_names.reject { |file_name| file_name[0] == '.' } unless options['a']
+          file_names = file_names.reverse if options['r']
+          file_names_by_dir[path] = file_names
+        else
+          file_paths << path
+        end
+      else
+        file_paths_not_found << path
+      end
+    end
 
-    file_names = justify_columns(file_names)
-    puts to_ls_text(file_names)
+    file_paths_not_found = file_paths_not_found.sort
+    file_paths = file_paths.sort
+    file_names_by_dir = file_names_by_dir.sort.to_h
+    if options['r']
+      file_paths = file_paths.reverse
+      file_names_by_dir = file_names_by_dir.to_a.reverse.to_h
+    end
+
+    ls_text = ''
+    ls_text += "#{to_ls_not_found_text(file_paths_not_found)}\n" unless file_paths_not_found.empty?
+    ls_text += "#{to_ls_text(justify_columns(file_paths))}\n" unless file_paths.empty?
+    if ls_text.empty? && file_names_by_dir.size == 1
+      ls_text = to_ls_text(justify_columns(file_names_by_dir.values[0]))
+    elsif file_names_by_dir.size > 1
+      ls_text += file_names_by_dir.map { |dir_path, file_names| "#{dir_path}:\n#{to_ls_text(justify_columns(file_names))}" }.join("\n")
+    end
+
+    puts ls_text.rstrip
   end
 end
 
@@ -157,6 +180,10 @@ def to_ls_text(file_names)
     ls_text += "\n"
   end
   ls_text
+end
+
+def to_ls_not_found_text(paths)
+  paths.map { |path| "ls: #{path}: No such file or directory" }.join("\n")
 end
 
 main if __FILE__ == $PROGRAM_NAME
