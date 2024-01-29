@@ -77,7 +77,7 @@ def main
     ls_text += "#{to_ls_text(justify_columns(file_paths))}\n" unless file_paths.empty?
     if ls_text.empty? && file_names_by_dir.size == 1
       ls_text = to_ls_text(justify_columns(file_names_by_dir.values[0]))
-    elsif file_names_by_dir.size > 1
+    elsif !file_names_by_dir.empty?
       ls_text += file_names_by_dir.map { |dir_path, file_names| "#{dir_path}:\n#{to_ls_text(justify_columns(file_names))}" }.join("\n")
     end
 
