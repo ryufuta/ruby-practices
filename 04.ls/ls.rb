@@ -42,7 +42,6 @@ def main
     else
       return if file_names.empty?
 
-      file_names = justify_columns(file_names)
       puts to_ls_text(file_names)
     end
   else
@@ -74,11 +73,11 @@ def main
 
     ls_text = ''
     ls_text += "#{to_ls_not_found_text(file_paths_not_found)}\n" unless file_paths_not_found.empty?
-    ls_text += "#{to_ls_text(justify_columns(file_paths))}\n\n" unless file_paths.empty?
+    ls_text += "#{to_ls_text(file_paths)}\n\n" unless file_paths.empty?
     if ls_text.empty? && file_names_by_dir.size == 1
-      ls_text = to_ls_text(justify_columns(file_names_by_dir.values[0]))
+      ls_text = to_ls_text(file_names_by_dir.values[0])
     elsif !file_names_by_dir.empty?
-      ls_text += file_names_by_dir.map { |dir_path, file_names| "#{dir_path}:\n#{to_ls_text(justify_columns(file_names))}" }.join("\n\n")
+      ls_text += file_names_by_dir.map { |dir_path, file_names| "#{dir_path}:\n#{to_ls_text(file_names)}" }.join("\n\n")
     end
 
     puts ls_text.rstrip
@@ -153,6 +152,21 @@ def calculate_total_blocks_and_column_widths(attributes_by_file)
   ]
 end
 
+def to_ls_text(file_names)
+  file_names = justify_columns(file_names)
+  # ファイル数が列数の倍数になるように末尾に空文字追加
+  file_names += [''] * (file_names.size.ceildiv(N_COLUMNS) * N_COLUMNS - file_names.size)
+
+  # 上から下、左から右へ昇順、指定した列数になるように表示
+  ls_text = ''
+  n_rows = file_names.size / N_COLUMNS
+  n_rows.times do |row|
+    N_COLUMNS.times { |col| ls_text += file_names[row + n_rows * col] }
+    ls_text += "\n"
+  end
+  ls_text.rstrip
+end
+
 def justify_columns(file_names)
   # 全角文字は2文字分カウント
   file_names_with_length = file_names.map { |file_name| [file_name, file_name.size + count_full_width_chars(file_name)] }
@@ -166,20 +180,6 @@ end
 
 def count_full_width_chars(str)
   str.scan(/[^\x01-\x7E\uFF65-\uFF9F]/).size
-end
-
-def to_ls_text(file_names)
-  # ファイル数が列数の倍数になるように末尾に空文字追加
-  file_names += [''] * (file_names.size.ceildiv(N_COLUMNS) * N_COLUMNS - file_names.size)
-
-  # 上から下、左から右へ昇順、指定した列数になるように表示
-  ls_text = ''
-  n_rows = file_names.size / N_COLUMNS
-  n_rows.times do |row|
-    N_COLUMNS.times { |col| ls_text += file_names[row + n_rows * col] }
-    ls_text += "\n"
-  end
-  ls_text.rstrip
 end
 
 def to_ls_not_found_text(paths)
