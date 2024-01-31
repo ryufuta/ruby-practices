@@ -75,12 +75,13 @@ def main
     ls_text += "#{to_ls_not_found_text(file_paths_not_found)}\n" unless file_paths_not_found.empty?
     ls_text += "#{to_ls_text(file_paths)}\n\n" unless file_paths.empty?
     if ls_text.empty? && file_names_by_dir.size == 1
-      ls_text = to_ls_text(file_names_by_dir.values[0])
+      ls_text = to_ls_text(file_names_by_dir.values[0]) unless file_names_by_dir.values[0].empty?
     elsif !file_names_by_dir.empty?
-      ls_text += file_names_by_dir.map { |dir_path, file_names| "#{dir_path}:\n#{to_ls_text(file_names)}" }.join("\n\n")
+      ls_text += file_names_by_dir.map { |dir_path, file_names| "#{dir_path}:#{"\n" + to_ls_text(file_names) unless file_names.empty?}" }.join("\n\n")
     end
 
-    puts ls_text.rstrip
+    ls_text = ls_text.rstrip
+    puts ls_text unless ls_text.empty?
   end
 end
 
