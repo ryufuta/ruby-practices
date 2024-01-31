@@ -50,32 +50,7 @@ def ls_without_args(options)
 end
 
 def ls_with_args(options, args)
-  file_paths_not_found = []
-  file_paths = []
-  # 同じディレクトリが複数回指定されたときは重複して表示するためハッシュではなく配列を使う
-  file_names_by_dir = []
-  args.each do |path|
-    if File.exist?(path)
-      if File.directory?(path)
-        file_names = Dir.entries(path).sort
-        file_names = file_names.reject { |file_name| file_name[0] == '.' } unless options['a']
-        file_names = file_names.reverse if options['r']
-        file_names_by_dir << [path, file_names]
-      else
-        file_paths << path
-      end
-    else
-      file_paths_not_found << path
-    end
-  end
-
-  file_paths_not_found = file_paths_not_found.sort
-  file_paths = file_paths.sort
-  file_names_by_dir = file_names_by_dir.sort
-  if options['r']
-    file_paths = file_paths.reverse
-    file_names_by_dir = file_names_by_dir.reverse
-  end
+  file_paths_not_found, file_paths, file_names_by_dir = to_sorted_paths(options, args)
 
   ls_text = ''
   ls_text += "#{to_ls_not_found_text(file_paths_not_found)}\n" unless file_paths_not_found.empty?
@@ -186,6 +161,36 @@ end
 
 def count_full_width_chars(str)
   str.scan(/[^\x01-\x7E\uFF65-\uFF9F]/).size
+end
+
+def to_sorted_paths(options, args)
+  file_paths_not_found = []
+  file_paths = []
+  # 同じディレクトリが複数回指定されたときは重複して表示するためハッシュではなく配列を使う
+  file_names_by_dir = []
+  args.each do |path|
+    if File.exist?(path)
+      if File.directory?(path)
+        file_names = Dir.entries(path).sort
+        file_names = file_names.reject { |file_name| file_name[0] == '.' } unless options['a']
+        file_names = file_names.reverse if options['r']
+        file_names_by_dir << [path, file_names]
+      else
+        file_paths << path
+      end
+    else
+      file_paths_not_found << path
+    end
+  end
+
+  file_paths_not_found = file_paths_not_found.sort
+  file_paths = file_paths.sort
+  file_names_by_dir = file_names_by_dir.sort
+  if options['r']
+    file_paths = file_paths.reverse
+    file_names_by_dir = file_names_by_dir.reverse
+  end
+  [file_paths_not_found, file_paths, file_names_by_dir]
 end
 
 def to_ls_not_found_text(paths)
