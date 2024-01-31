@@ -47,14 +47,15 @@ def main
   else
     file_paths_not_found = []
     file_paths = []
-    file_names_by_dir = {}
+    # 同じディレクトリが複数回指定されたときは重複して表示するためハッシュではなく配列を使う
+    file_names_by_dir = []
     ARGV.each do |path|
       if File.exist?(path)
         if File.directory?(path)
           file_names = Dir.entries(path).sort
           file_names = file_names.reject { |file_name| file_name[0] == '.' } unless options['a']
           file_names = file_names.reverse if options['r']
-          file_names_by_dir[path] = file_names
+          file_names_by_dir << [path, file_names]
         else
           file_paths << path
         end
@@ -65,17 +66,17 @@ def main
 
     file_paths_not_found = file_paths_not_found.sort
     file_paths = file_paths.sort
-    file_names_by_dir = file_names_by_dir.sort.to_h
+    file_names_by_dir = file_names_by_dir.sort
     if options['r']
       file_paths = file_paths.reverse
-      file_names_by_dir = file_names_by_dir.to_a.reverse.to_h
+      file_names_by_dir = file_names_by_dir.reverse
     end
 
     ls_text = ''
     ls_text += "#{to_ls_not_found_text(file_paths_not_found)}\n" unless file_paths_not_found.empty?
     ls_text += "#{to_ls_text(file_paths)}\n\n" unless file_paths.empty?
     if ls_text.empty? && file_names_by_dir.size == 1
-      ls_text = to_ls_text(file_names_by_dir.values[0]) unless file_names_by_dir.values[0].empty?
+      ls_text = to_ls_text(file_names_by_dir[0][1]) unless file_names_by_dir[0][1].empty?
     elsif !file_names_by_dir.empty?
       ls_text += file_names_by_dir.map { |dir_path, file_names| "#{dir_path}:#{"\n" + to_ls_text(file_names) unless file_names.empty?}" }.join("\n\n")
     end
