@@ -43,9 +43,8 @@ def ls_without_args(options)
 
     puts to_ls_l_text(file_names)
   else
-    return if file_names.empty?
-
-    puts to_ls_text(file_names)
+    ls_text = to_ls_text(file_names)
+    puts ls_text unless ls_text.empty?
   end
 end
 
@@ -124,6 +123,8 @@ def calculate_total_blocks_and_column_widths(attributes_by_file)
 end
 
 def to_ls_text(file_names)
+  return '' if file_names.empty?
+
   file_names = justify_columns(file_names)
   # ファイル数が列数の倍数になるように末尾に空文字追加
   file_names += [''] * (file_names.size.ceildiv(N_COLUMNS) * N_COLUMNS - file_names.size)
