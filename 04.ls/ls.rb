@@ -169,18 +169,14 @@ def to_sorted_paths(options, args)
   # 同じディレクトリが複数回指定されたときは重複して表示するためハッシュではなく配列を使う
   file_names_by_dir = []
   args.each do |path|
-    if File.exist?(path)
-      if File.directory?(path)
-        file_names = Dir.entries(path).sort
-        file_names = file_names.reject { |file_name| file_name[0] == '.' } unless options['a']
-        file_names = file_names.reverse if options['r']
-        file_names_by_dir << [path, file_names]
-      else
-        file_paths << path
-      end
-    else
-      file_paths_not_found << path
-    end
+    next file_paths_not_found << path unless File.exist?(path)
+
+    next file_paths << path unless File.directory?(path)
+
+    file_names = Dir.entries(path).sort
+    file_names = file_names.reject { |file_name| file_name[0] == '.' } unless options['a']
+    file_names = file_names.reverse if options['r']
+    file_names_by_dir << [path, file_names]
   end
 
   file_paths_not_found = file_paths_not_found.sort
