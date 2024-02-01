@@ -51,18 +51,8 @@ end
 
 def ls_with_args(options, args)
   file_paths_not_found, file_paths, file_names_by_dir = to_sorted_paths(options, args)
-
-  ls_text = ''
-  ls_text += "#{to_ls_not_found_text(file_paths_not_found)}\n" unless file_paths_not_found.empty?
-  ls_text += "#{to_ls_text(file_paths)}\n\n" unless file_paths.empty?
-  if ls_text.empty? && file_names_by_dir.size == 1
-    ls_text = to_ls_text(file_names_by_dir[0][1]) unless file_names_by_dir[0][1].empty?
-  elsif !file_names_by_dir.empty?
-    ls_text += file_names_by_dir.map { |dir_path, file_names| "#{dir_path}:#{"\n" + to_ls_text(file_names) unless file_names.empty?}" }.join("\n\n")
-  end
-
-  ls_text = ls_text.rstrip
-  puts ls_text unless ls_text.empty?
+  ls_args_text = to_ls_args_text(file_paths_not_found, file_paths, file_names_by_dir)
+  puts ls_args_text unless ls_args_text.empty?
 end
 
 def to_ls_l_text(file_names)
@@ -187,6 +177,18 @@ def to_sorted_paths(options, args)
     file_names_by_dir = file_names_by_dir.reverse
   end
   [file_paths_not_found, file_paths, file_names_by_dir]
+end
+
+def to_ls_args_text(file_paths_not_found, file_paths, file_names_by_dir)
+  ls_args_text = ''
+  ls_args_text += "#{to_ls_not_found_text(file_paths_not_found)}\n" unless file_paths_not_found.empty?
+  ls_args_text += "#{to_ls_text(file_paths)}\n\n" unless file_paths.empty?
+  if ls_args_text.empty? && file_names_by_dir.size == 1
+    ls_args_text = to_ls_text(file_names_by_dir[0][1]) unless file_names_by_dir[0][1].empty?
+  elsif !file_names_by_dir.empty?
+    ls_args_text += file_names_by_dir.map { |dir_path, file_names| "#{dir_path}:#{"\n" + to_ls_text(file_names) unless file_names.empty?}" }.join("\n\n")
+  end
+  ls_args_text.rstrip
 end
 
 def to_ls_not_found_text(paths)
