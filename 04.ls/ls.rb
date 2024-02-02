@@ -39,8 +39,6 @@ def ls_without_args(options)
   file_names = options['a'] ? Dir.entries('.').sort : Dir.glob('*')
   file_names = file_names.reverse if options['r']
   if options['l']
-    return puts 'total 0' if file_names.empty?
-
     puts to_ls_l_text(file_names)
   else
     ls_text = to_ls_text(file_names)
@@ -55,6 +53,8 @@ def ls_with_args(options, args)
 end
 
 def to_ls_l_text(file_names)
+  return 'total 0' if file_names.empty?
+
   xattr_found = system('which xattr', out: '/dev/null', err: '/dev/null')
   attributes_by_file = file_names.map { |file_name| fetch_file_attributes(file_name, xattr_found) }
   total_blocks, max_digit_links, max_owner_name_length, max_group_name_length, max_digit_file_size =
