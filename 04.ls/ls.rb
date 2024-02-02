@@ -48,18 +48,31 @@ end
 
 def ls_with_args(options, args)
   file_paths_not_found, file_paths, file_names_by_dir = to_sorted_paths(options, args)
-  ls_args_text = to_ls_args_text(file_paths_not_found, file_paths, file_names_by_dir)
-  puts ls_args_text unless ls_args_text.empty?
+  if options['l']
+    puts to_ls_l_args_text(file_paths_not_found, file_paths, file_names_by_dir)
+  else
+    ls_args_text = to_ls_args_text(file_paths_not_found, file_paths, file_names_by_dir)
+    puts ls_args_text unless ls_args_text.empty?
+  end
 end
 
-def to_ls_l_text(file_names)
+def to_ls_l_args_text(file_paths_not_found, file_paths, file_names_by_dir)
+  ls_not_found_text = to_ls_not_found_text(file_paths_not_found)
+  ls_l_files_text_with_lf = file_paths.empty? ? '' : "#{to_ls_l_text(file_paths, total_blocks_required: false)}\n\n"
+  # TODO: to_ls_l_dirs_textメソッド実装
+  ls_l_dirs_text = ''
+  "#{ls_not_found_text}\n#{ls_l_files_text_with_lf}#{ls_l_dirs_text}".strip
+end
+
+def to_ls_l_text(file_names, total_blocks_required: true)
   return 'total 0' if file_names.empty?
 
   xattr_found = system('which xattr', out: '/dev/null', err: '/dev/null')
   attributes_by_file = file_names.map { |file_name| fetch_file_attributes(file_name, xattr_found) }
   total_blocks, max_digit_links, max_owner_name_length, max_group_name_length, max_digit_file_size =
     calculate_total_blocks_and_column_widths(attributes_by_file)
-  "total #{total_blocks}\n" + attributes_by_file.map do |file_attributes|
+  total_blocks_text_with_ls = total_blocks_required ? "total #{total_blocks}\n" : ''
+  total_blocks_text_with_ls + attributes_by_file.map do |file_attributes|
     "#{file_attributes.file_type_with_permissions}#{file_attributes.xattr || ' '} "\
     "#{file_attributes.nlinks.to_s.rjust(max_digit_links)} "\
     "#{file_attributes.owner_name.ljust(max_owner_name_length)}  "\
