@@ -183,7 +183,7 @@ def to_sorted_paths(options, args)
   args.each do |path|
     next file_paths_not_found << path unless File.exist?(path)
 
-    next file_paths << path unless File.directory?(path)
+    next file_paths << path if !File.directory?(path) || (options['l'] && File.symlink?(path))
 
     file_names = Dir.entries(path).sort
     file_names = file_names.reject { |file_name| file_name[0] == '.' } unless options['a']
