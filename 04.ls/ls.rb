@@ -176,29 +176,34 @@ def count_full_width_chars(str)
 end
 
 def to_sorted_paths(options, args)
-  file_paths_not_found = []
-  file_paths = []
+  file_paths_not_found, file_paths, dir_paths = group_paths_by_type(args, options['l'])
   # 同じディレクトリが複数回指定されたときは重複して表示するためハッシュではなく配列を使う
-  file_names_by_dir = []
-  args.each do |path|
-    next file_paths_not_found << path unless File.exist?(path)
-
-    next file_paths << path if !File.directory?(path) || (options['l'] && File.symlink?(path))
-
-    file_names = Dir.entries(path).sort
+  file_names_by_dir = dir_paths.map do |dir_path|
+    file_names = Dir.entries(dir_path).sort
     file_names = file_names.reject { |file_name| file_name[0] == '.' } unless options['a']
     file_names = file_names.reverse if options['r']
-    file_names_by_dir << [path, file_names]
+    [dir_path, file_names]
   end
 
-  file_paths_not_found = file_paths_not_found.sort
-  file_paths = file_paths.sort
-  file_names_by_dir = file_names_by_dir.sort
   if options['r']
     file_paths = file_paths.reverse
     file_names_by_dir = file_names_by_dir.reverse
   end
   [file_paths_not_found, file_paths, file_names_by_dir]
+end
+
+def group_paths_by_type(paths, l_option)
+  file_paths_not_found = []
+  file_paths = []
+  dir_paths = []
+  paths.each do |path|
+    next file_paths_not_found << path unless File.exist?(path)
+
+    next file_paths << path if !File.directory?(path) || (l_option && File.symlink?(path))
+
+    dir_paths << path
+  end
+  [file_paths_not_found.sort, file_paths.sort, dir_paths.sort]
 end
 
 def to_ls_args_text(file_paths_not_found, file_paths, file_names_by_dir)
