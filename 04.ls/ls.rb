@@ -59,16 +59,23 @@ end
 def to_ls_l_args_text(file_paths_not_found, file_paths, file_names_by_dir)
   ls_not_found_text = to_ls_not_found_text(file_paths_not_found)
   ls_l_files_text_with_lf = file_paths.empty? ? '' : "#{to_ls_l_text(file_paths, total_blocks_required: false)}\n\n"
-  # TODO: to_ls_l_dirs_textメソッド実装
-  ls_l_dirs_text = ''
+  ls_l_dirs_text = to_ls_l_dirs_text(file_names_by_dir, ls_not_found_text.empty? && ls_l_files_text_with_lf.empty?)
   "#{ls_not_found_text}\n#{ls_l_files_text_with_lf}#{ls_l_dirs_text}".strip
 end
 
-def to_ls_l_text(file_names, total_blocks_required: true)
+def to_ls_l_dirs_text(file_names_by_dir, dirs_only)
+  return '' if file_names_by_dir.empty?
+
+  return to_ls_l_text(file_names_by_dir[0][1], file_names_by_dir[0][0]) if dirs_only && file_names_by_dir.size == 1
+
+  file_names_by_dir.map { |dir_path, file_names| "#{dir_path}:\n#{to_ls_l_text(file_names, dir_path)}" }.join("\n\n")
+end
+
+def to_ls_l_text(file_names, base_dir = nil, total_blocks_required: true)
   return 'total 0' if file_names.empty?
 
   xattr_found = system('which xattr', out: '/dev/null', err: '/dev/null')
-  attributes_by_file = file_names.map { |file_name| fetch_file_attributes(file_name, xattr_found) }
+  attributes_by_file = file_names.map { |file_name| fetch_file_attributes(file_name, xattr_found, base_dir) }
   total_blocks, max_digit_links, max_owner_name_length, max_group_name_length, max_digit_file_size =
     calculate_total_blocks_and_column_widths(attributes_by_file)
   total_blocks_text_with_ls = total_blocks_required ? "total #{total_blocks}\n" : ''
@@ -83,18 +90,19 @@ def to_ls_l_text(file_names, total_blocks_required: true)
   end.join("\n")
 end
 
-def fetch_file_attributes(file_name, xattr_found)
-  file_attributes = File.lstat(file_name)
+def fetch_file_attributes(file_name, xattr_found, base_dir = nil)
+  file_path = base_dir.nil? ? file_name : File.join(base_dir, file_name)
+  file_attributes = File.lstat(file_path)
   FileAttribute.new(
     file_attributes.blocks,
     to_symbolic_notation(file_attributes.mode),
-    xattr_found && !Open3.capture3("xattr -s #{file_name}")[0].empty? ? '@' : nil,
+    xattr_found && !Open3.capture3("xattr -s #{file_path}")[0].empty? ? '@' : nil,
     file_attributes.nlink,
     Etc.getpwuid(file_attributes.uid).name,
     Etc.getgrgid(file_attributes.gid).name,
     file_attributes.size,
     format_timestamp(file_attributes.mtime),
-    file_attributes.symlink? ? "#{file_name} -> #{File.readlink(file_name)}" : file_name
+    file_attributes.symlink? ? "#{file_name} -> #{File.readlink(file_path)}" : file_name
   )
 end
 
