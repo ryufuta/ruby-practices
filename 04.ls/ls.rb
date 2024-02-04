@@ -50,6 +50,8 @@ def ls_with_args(options, args)
   file_paths_not_found, file_paths, file_names_by_dir = to_sorted_paths(options, args)
   ls_not_found_text = to_ls_not_found_text(file_paths_not_found)
   warn ls_not_found_text unless ls_not_found_text.empty?
+  return if file_paths.empty? && file_names_by_dir.empty?
+
   single_arg = args.size == 1
   if options['l']
     puts to_ls_l_args_text(file_paths, file_names_by_dir, single_arg)
