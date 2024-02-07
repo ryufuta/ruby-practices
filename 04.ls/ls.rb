@@ -32,21 +32,7 @@ FileAttribute = Data.define(:blocks, :file_type_with_permissions, :xattr, :nlink
 
 def main
   options = ARGV.getopts('alr')
-  ARGV.empty? ? ls_without_args(options) : ls_with_args(options, ARGV)
-end
-
-def ls_without_args(options)
-  file_names = options['a'] ? Dir.entries('.').sort : Dir.glob('*')
-  file_names = file_names.reverse if options['r']
-  if options['l']
-    puts to_ls_l_text(file_names)
-  else
-    ls_text = to_ls_text(file_names)
-    puts ls_text unless ls_text.empty?
-  end
-end
-
-def ls_with_args(options, args)
+  args = ARGV.empty? ? ['.'] : ARGV
   file_paths_not_found, file_paths, file_names_by_dir = to_sorted_paths(options, args)
   ls_not_found_text = to_ls_not_found_text(file_paths_not_found)
   warn ls_not_found_text unless ls_not_found_text.empty?
