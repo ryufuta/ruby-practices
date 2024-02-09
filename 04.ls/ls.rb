@@ -39,18 +39,19 @@ def main
   return if file_paths.empty? && file_names_by_dir.empty?
 
   single_arg = args.size == 1
-  if options['l']
-    puts to_ls_l_args_text(file_paths, file_names_by_dir, single_arg)
-  else
-    ls_args_text = to_ls_args_text(file_paths, file_names_by_dir, single_arg)
-    puts ls_args_text unless ls_args_text.empty?
-  end
+  ls_args_text = to_ls_args_text(file_paths, file_names_by_dir, options['l'], single_arg)
+  puts ls_args_text unless ls_args_text.empty?
 end
 
-def to_ls_l_args_text(file_paths, file_names_by_dir, single_arg)
-  ls_l_files_text_with_lf = file_paths.empty? ? '' : "#{to_ls_l_text(file_paths, total_blocks_required: false)}\n\n"
-  ls_l_dirs_text = to_ls_l_dirs_text(file_names_by_dir, single_arg)
-  "#{ls_l_files_text_with_lf}#{ls_l_dirs_text}".rstrip
+def to_ls_args_text(file_paths, file_names_by_dir, l_option, single_arg)
+  if l_option
+    ls_files_text = file_paths.empty? ? '' : to_ls_l_text(file_paths, total_blocks_required: false)
+    ls_dirs_text = to_ls_l_dirs_text(file_names_by_dir, single_arg)
+  else
+    ls_files_text = to_ls_text(file_paths)
+    ls_dirs_text = to_ls_dirs_text(file_names_by_dir, single_arg)
+  end
+  "#{ls_files_text}#{"\n\n" unless ls_files_text.empty? || ls_dirs_text.empty?}#{ls_dirs_text}"
 end
 
 def to_ls_l_dirs_text(file_names_by_dir, single_arg)
@@ -59,13 +60,6 @@ def to_ls_l_dirs_text(file_names_by_dir, single_arg)
   return to_ls_l_text(file_names_by_dir[0][1], file_names_by_dir[0][0]) if single_arg
 
   file_names_by_dir.map { |dir_path, file_names| "#{dir_path}:\n#{to_ls_l_text(file_names, dir_path)}" }.join("\n\n")
-end
-
-def to_ls_args_text(file_paths, file_names_by_dir, single_arg)
-  ls_files_text = to_ls_text(file_paths)
-  ls_dirs_text = to_ls_dirs_text(file_names_by_dir, single_arg)
-  ls_files_text_with_lf = ls_files_text.empty? ? '' : "#{ls_files_text}\n\n"
-  "#{ls_files_text_with_lf}#{ls_dirs_text}".rstrip
 end
 
 def to_ls_dirs_text(file_names_by_dir, single_arg)
