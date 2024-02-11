@@ -4,6 +4,7 @@
 require 'date'
 require 'etc'
 require 'optparse'
+require 'open3'
 
 COLUMN_WIDTH_UNIT = 8
 N_COLUMNS = 3
@@ -31,27 +32,56 @@ FileAttribute = Data.define(:blocks, :file_type_with_permissions, :xattr, :nlink
 
 def main
   options = ARGV.getopts('alr')
-  file_names = options['a'] ? Dir.entries('.').sort : Dir.glob('*')
-  file_names = file_names.reverse if options['r']
+  args = ARGV.empty? ? ['.'] : ARGV
+  file_paths_not_found, file_paths, file_names_by_dir = to_sorted_paths(options, args)
+  ls_not_found_text = to_ls_not_found_text(file_paths_not_found)
+  warn ls_not_found_text unless ls_not_found_text.empty?
+  return if file_paths.empty? && file_names_by_dir.empty?
 
-  if options['l']
-    return puts 'total 0' if file_names.empty?
-
-    puts to_ls_l_text(file_names)
-  else
-    return if file_names.empty?
-
-    file_names = justify_columns(file_names)
-    puts to_ls_text(file_names)
-  end
+  single_arg = args.size == 1
+  ls_args_text = to_ls_args_text(file_paths, file_names_by_dir, options['l'], single_arg)
+  puts ls_args_text unless ls_args_text.empty?
 end
 
-def to_ls_l_text(file_names)
+def to_ls_args_text(file_paths, file_names_by_dir, l_option, single_arg)
+  if l_option
+    ls_files_text = file_paths.empty? ? '' : to_ls_l_text(file_paths, total_blocks_required: false)
+    ls_dirs_text = to_ls_l_dirs_text(file_names_by_dir, single_arg)
+  else
+    ls_files_text = to_ls_text(file_paths)
+    ls_dirs_text = to_ls_dirs_text(file_names_by_dir, single_arg)
+  end
+  "#{ls_files_text}#{"\n\n" unless ls_files_text.empty? || ls_dirs_text.empty?}#{ls_dirs_text}"
+end
+
+def to_ls_l_dirs_text(file_names_by_dir, single_arg)
+  return '' if file_names_by_dir.empty?
+
+  return to_ls_l_text(file_names_by_dir[0][1], file_names_by_dir[0][0]) if single_arg
+
+  file_names_by_dir.map { |dir_path, file_names| "#{dir_path}:\n#{to_ls_l_text(file_names, dir_path)}" }.join("\n\n")
+end
+
+def to_ls_dirs_text(file_names_by_dir, single_arg)
+  return '' if file_names_by_dir.empty?
+
+  return to_ls_text(file_names_by_dir[0][1]) if single_arg
+
+  file_names_by_dir.map do |dir_path, file_names|
+    ls_text_with_lf = file_names.empty? ? '' : "\n#{to_ls_text(file_names)}"
+    "#{dir_path}:#{ls_text_with_lf}"
+  end.join("\n\n")
+end
+
+def to_ls_l_text(file_names, base_dir = nil, total_blocks_required: true)
+  return 'total 0' if file_names.empty?
+
   xattr_found = system('which xattr', out: '/dev/null', err: '/dev/null')
-  attributes_by_file = file_names.map { |file_name| fetch_file_attributes(file_name, xattr_found) }
+  attributes_by_file = file_names.map { |file_name| fetch_file_attributes(file_name, xattr_found, base_dir) }
   total_blocks, max_digit_links, max_owner_name_length, max_group_name_length, max_digit_file_size =
     calculate_total_blocks_and_column_widths(attributes_by_file)
-  "total #{total_blocks}\n" + attributes_by_file.map do |file_attributes|
+  total_blocks_text_with_ls = total_blocks_required ? "total #{total_blocks}\n" : ''
+  total_blocks_text_with_ls + attributes_by_file.map do |file_attributes|
     "#{file_attributes.file_type_with_permissions}#{file_attributes.xattr || ' '} "\
     "#{file_attributes.nlinks.to_s.rjust(max_digit_links)} "\
     "#{file_attributes.owner_name.ljust(max_owner_name_length)}  "\
@@ -62,18 +92,19 @@ def to_ls_l_text(file_names)
   end.join("\n")
 end
 
-def fetch_file_attributes(file_name, xattr_found)
-  file_attributes = File.lstat(file_name)
+def fetch_file_attributes(file_name, xattr_found, base_dir = nil)
+  file_path = base_dir.nil? ? file_name : File.join(base_dir, file_name)
+  file_attributes = File.lstat(file_path)
   FileAttribute.new(
     file_attributes.blocks,
     to_symbolic_notation(file_attributes.mode),
-    xattr_found && !`xattr -s #{file_name}`.empty? ? '@' : nil,
+    xattr_found && !Open3.capture3("xattr -s #{file_path}")[0].empty? ? '@' : nil,
     file_attributes.nlink,
     Etc.getpwuid(file_attributes.uid).name,
     Etc.getgrgid(file_attributes.gid).name,
     file_attributes.size,
     format_timestamp(file_attributes.mtime),
-    file_attributes.symlink? ? "#{file_name} -> #{File.readlink(file_name)}" : file_name
+    file_attributes.symlink? ? "#{file_name} -> #{File.readlink(file_path)}" : file_name
   )
 end
 
@@ -114,6 +145,23 @@ def calculate_total_blocks_and_column_widths(attributes_by_file)
   ]
 end
 
+def to_ls_text(file_names)
+  return '' if file_names.empty?
+
+  file_names = justify_columns(file_names)
+  # ファイル数が列数の倍数になるように末尾に空文字追加
+  file_names += [''] * (file_names.size.ceildiv(N_COLUMNS) * N_COLUMNS - file_names.size)
+
+  # 上から下、左から右へ昇順、指定した列数になるように表示
+  ls_text = ''
+  n_rows = file_names.size / N_COLUMNS
+  n_rows.times do |row|
+    N_COLUMNS.times { |col| ls_text += file_names[row + n_rows * col] }
+    ls_text += "\n"
+  end
+  ls_text.rstrip
+end
+
 def justify_columns(file_names)
   # 全角文字は2文字分カウント
   file_names_with_length = file_names.map { |file_name| [file_name, file_name.size + count_full_width_chars(file_name)] }
@@ -129,18 +177,39 @@ def count_full_width_chars(str)
   str.scan(/[^\x01-\x7E\uFF65-\uFF9F]/).size
 end
 
-def to_ls_text(file_names)
-  # ファイル数が列数の倍数になるように末尾に空文字追加
-  file_names += [''] * (file_names.size.ceildiv(N_COLUMNS) * N_COLUMNS - file_names.size)
-
-  # 上から下、左から右へ昇順、指定した列数になるように表示
-  ls_text = ''
-  n_rows = file_names.size / N_COLUMNS
-  n_rows.times do |row|
-    N_COLUMNS.times { |col| ls_text += file_names[row + n_rows * col] }
-    ls_text += "\n"
+def to_sorted_paths(options, args)
+  file_paths_not_found, file_paths, dir_paths = group_paths_by_type(args, options['l'])
+  # 同じディレクトリが複数回指定されたときは重複して表示するためハッシュではなく配列を使う
+  file_names_by_dir = dir_paths.map do |dir_path|
+    file_names = Dir.entries(dir_path).sort
+    file_names = file_names.reject { |file_name| file_name[0] == '.' } unless options['a']
+    file_names = file_names.reverse if options['r']
+    [dir_path, file_names]
   end
-  ls_text
+
+  if options['r']
+    file_paths = file_paths.reverse
+    file_names_by_dir = file_names_by_dir.reverse
+  end
+  [file_paths_not_found, file_paths, file_names_by_dir]
+end
+
+def group_paths_by_type(paths, l_option)
+  file_paths_not_found = []
+  file_paths = []
+  dir_paths = []
+  paths.each do |path|
+    next file_paths_not_found << path unless File.exist?(path)
+
+    next file_paths << path if !File.directory?(path) || (l_option && File.symlink?(path))
+
+    dir_paths << path
+  end
+  [file_paths_not_found.sort, file_paths.sort, dir_paths.sort]
+end
+
+def to_ls_not_found_text(paths)
+  paths.map { |path| "ls: #{path}: No such file or directory" }.join("\n")
 end
 
 main if __FILE__ == $PROGRAM_NAME
