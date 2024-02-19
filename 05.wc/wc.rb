@@ -5,19 +5,30 @@ COLUMN_WIDTH = 8
 
 def main
   file_paths = ARGV
-  counts_by_file = file_paths.map { |file_path| [file_path, count_lines_words_bytes(file_path)] }
-  counts_by_row = counts_by_file.size > 1 ? [*counts_by_file, ['total', sum_counts(counts_by_file)]] : counts_by_file
+  counts_by_row =
+    if file_paths.empty?
+      lines = $stdin.readlines
+      [[nil, count_lines_words_bytes(lines)]]
+    else
+      counts_by_file = file_paths.map { |file_path| [file_path, count_lines_words_bytes(file_path)] }
+      counts_by_file.size > 1 ? [*counts_by_file, ['total', sum_counts(counts_by_file)]] : counts_by_file
+    end
   puts to_wc_text(counts_by_row)
 end
 
-def count_lines_words_bytes(file_path)
-  counts = []
-  File.open(file_path, 'r') do |f|
-    lines = f.readlines
-    counts << lines.count
-    counts << lines.sum { |line| line.split(/\s+/).count }
-  end
-  counts << File.size(file_path)
+def count_lines_words_bytes(file_path_or_lines)
+  lines =
+    if file_path_or_lines.instance_of?(String)
+      File.open(file_path_or_lines, 'r', &:readlines)
+    else
+      file_path_or_lines
+    end
+
+  [
+    lines.count,
+    lines.sum { |line| line.split(/\s+/).count },
+    lines.sum(&:bytesize)
+  ]
 end
 
 def sum_counts(counts_by_file)
@@ -30,7 +41,7 @@ end
 
 def to_wc_text(counts_by_row)
   counts_by_row.map do |row_name, counts|
-    "#{counts.map { |count| count.to_s.rjust(COLUMN_WIDTH) }.join} #{row_name}"
+    "#{counts.map { |count| count.to_s.rjust(COLUMN_WIDTH) }.join} #{row_name}".rstrip
   end.join("\n")
 end
 
