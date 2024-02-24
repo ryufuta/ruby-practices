@@ -18,7 +18,7 @@ def main
         lines = File.open(file_path, 'r', &:readlines)
         [file_path, count_lines_words_bytes(lines, **use_counts)]
       end
-      counts_by_file.size > 1 ? [*counts_by_file, ['total', sum_counts(counts_by_file)]] : counts_by_file
+      counts_by_file.size > 1 ? [*counts_by_file, ['total', sum_counts(counts_by_file.map { |_, counts| counts })]] : counts_by_file
     end
   puts to_wc_text(counts_by_row)
 end
@@ -40,8 +40,8 @@ def count_lines_words_bytes(lines, use_line: true, use_word: true, use_byte: tru
 end
 
 def sum_counts(counts_by_file)
-  total_counts = [0] * counts_by_file[0][1].size
-  counts_by_file.each do |_, counts|
+  total_counts = [0] * counts_by_file[0].size
+  counts_by_file.each do |counts|
     counts.each_with_index { |count, i| total_counts[i] += count }
   end
   total_counts
