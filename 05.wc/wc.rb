@@ -14,7 +14,10 @@ def main
       lines = $stdin.readlines
       [[nil, count_lines_words_bytes(lines, **use_counts)]]
     else
-      counts_by_file = file_paths.map { |file_path| [file_path, count_lines_words_bytes(file_path, **use_counts)] }
+      counts_by_file = file_paths.map do |file_path|
+        lines = File.open(file_path, 'r', &:readlines)
+        [file_path, count_lines_words_bytes(lines, **use_counts)]
+      end
       counts_by_file.size > 1 ? [*counts_by_file, ['total', sum_counts(counts_by_file)]] : counts_by_file
     end
   puts to_wc_text(counts_by_row)
@@ -28,14 +31,7 @@ def parse_options(options)
   end
 end
 
-def count_lines_words_bytes(file_path_or_lines, use_line: true, use_word: true, use_byte: true)
-  lines =
-    if file_path_or_lines.instance_of?(String)
-      File.open(file_path_or_lines, 'r', &:readlines)
-    else
-      file_path_or_lines
-    end
-
+def count_lines_words_bytes(lines, use_line: true, use_word: true, use_byte: true)
   counts = []
   counts << lines.count if use_line
   counts << lines.sum { |line| line.split(/\s+/).count } if use_word
