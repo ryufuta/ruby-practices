@@ -21,7 +21,7 @@ def main
 end
 
 def parse_options(options)
-  if !options['l'] && !options['w'] && !options['c']
+  if options.values_at('l', 'w', 'c').all?(&:!)
     { use_line: true, use_word: true, use_byte: true }
   else
     { use_line: options['l'], use_word: options['w'], use_byte: options['c'] }
