@@ -15,7 +15,7 @@ def main
       [[nil, count_lines_words_bytes(lines, **use_counts)]]
     else
       counts_by_file = file_paths.map do |file_path|
-        lines = File.open(file_path, 'r', &:readlines)
+        lines = File.readlines(file_path)
         [file_path, count_lines_words_bytes(lines, **use_counts)]
       end
       counts_by_file.size > 1 ? [*counts_by_file, ['total', sum_counts(counts_by_file.map { |_, counts| counts })]] : counts_by_file
