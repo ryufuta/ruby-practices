@@ -18,4 +18,14 @@ class FrameTest < Minitest::Test
     frame = Frame.new('X', 'X', '1')
     assert_equal 21, frame.score
   end
+
+  def test_strike
+    frame = Frame.new('X')
+    assert frame.strike?
+  end
+
+  def test_not_strike
+    frame = Frame.new('0', '10')
+    refute frame.strike?
+  end
 end

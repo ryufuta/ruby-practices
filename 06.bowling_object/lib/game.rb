@@ -26,17 +26,13 @@ class Game
   def score_bonus_shots(idx)
     frame = @frames[idx]
     next_frame = @frames[idx + 1]
-    if strike?(frame)
+    if frame.strike?
       next_frame.first_shot.score + (next_frame.second_shot.mark.nil? ? @frames[idx + 2].first_shot.score : next_frame.second_shot.score)
     elsif spare?(frame)
       next_frame.first_shot.score
     else
       0
     end
-  end
-
-  def strike?(frame)
-    frame.first_shot.mark == 'X'
   end
 
   def spare?(frame)
