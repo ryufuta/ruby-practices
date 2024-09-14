@@ -22,4 +22,16 @@ class Frame
   def spare?
     @first_shot.mark != 'X' && score == 10
   end
+
+  def score_first_shot
+    @first_shot.score
+  end
+
+  def score_second_shot
+    @second_shot.score
+  end
+
+  def only_one_shot?
+    @second_shot.mark.nil?
+  end
 end

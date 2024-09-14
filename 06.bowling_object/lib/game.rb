@@ -27,9 +27,9 @@ class Game
     frame = @frames[idx]
     next_frame = @frames[idx + 1]
     if frame.strike?
-      next_frame.first_shot.score + (next_frame.second_shot.mark.nil? ? @frames[idx + 2].first_shot.score : next_frame.second_shot.score)
+      next_frame.score_first_shot + (next_frame.only_one_shot? ? @frames[idx + 2].score_first_shot : next_frame.score_second_shot)
     elsif frame.spare?
-      next_frame.first_shot.score
+      next_frame.score_first_shot
     else
       0
     end
