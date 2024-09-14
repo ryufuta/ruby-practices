@@ -18,4 +18,8 @@ class Frame
   def strike?
     @first_shot.mark == 'X'
   end
+
+  def spare?
+    @first_shot.mark != 'X' && score == 10
+  end
 end

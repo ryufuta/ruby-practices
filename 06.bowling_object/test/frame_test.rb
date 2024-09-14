@@ -28,4 +28,17 @@ class FrameTest < Minitest::Test
     frame = Frame.new('0', '10')
     refute frame.strike?
   end
+
+  def test_spare
+    frame = Frame.new('1', '9')
+    assert frame.spare?
+  end
+
+  def test_not_spare
+    frame = Frame.new('1', '1')
+    refute frame.spare?
+
+    strike_frame = Frame.new('X')
+    refute strike_frame.spare?
+  end
 end

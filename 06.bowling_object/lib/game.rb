@@ -28,15 +28,11 @@ class Game
     next_frame = @frames[idx + 1]
     if frame.strike?
       next_frame.first_shot.score + (next_frame.second_shot.mark.nil? ? @frames[idx + 2].first_shot.score : next_frame.second_shot.score)
-    elsif spare?(frame)
+    elsif frame.spare?
       next_frame.first_shot.score
     else
       0
     end
-  end
-
-  def spare?(frame)
-    frame.first_shot.mark != 'X' && frame.score == 10
   end
 
   def self.parse_marks(marks_text)
