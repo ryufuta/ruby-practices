@@ -5,9 +5,7 @@ require_relative 'shot'
 class Frame
   def initialize(idx, first_mark, second_mark = nil, third_mark = nil)
     @idx = idx
-    @first_shot = Shot.new(first_mark)
-    @second_shot = Shot.new(second_mark)
-    @third_shot = Shot.new(third_mark)
+    @shots = [Shot.new(first_mark), Shot.new(second_mark), Shot.new(third_mark)]
   end
 
   def score(frames)
@@ -17,7 +15,7 @@ class Frame
   private
 
   def score_without_bonus
-    [@first_shot.score, @second_shot.score, @third_shot.score].sum
+    @shots.sum(&:score)
   end
 
   def final?
@@ -36,24 +34,24 @@ class Frame
   end
 
   def strike?
-    @first_shot.mark == 'X'
+    @shots.first.mark == 'X'
   end
 
   def spare?
-    @first_shot.mark != 'X' && score_without_bonus == 10
+    @shots.first.mark != 'X' && score_without_bonus == 10
   end
 
   protected
 
   def score_first_shot
-    @first_shot.score
+    @shots.first.score
   end
 
   def score_second_shot
-    @second_shot.score
+    @shots[1].score
   end
 
   def only_one_shot?
-    @second_shot.mark.nil?
+    @shots[1].mark.nil?
   end
 end
