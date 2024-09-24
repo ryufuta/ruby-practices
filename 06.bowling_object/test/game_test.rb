@@ -4,17 +4,6 @@ require 'minitest/autorun'
 require_relative '../lib/game'
 
 class GameTest < Minitest::Test
-  def test_parse_marks_two_shots_per_frame
-    marks_by_frame = Game.parse_marks('1,5,1,5,1,5,1,5,1,5,1,5,1,5,1,5,1,5,1,5')
-    assert_equal [%w[1 5]] * 10, marks_by_frame
-  end
-
-  def test_parse_marks_one_or_three_shots_per_frame
-    marks_by_frame = Game.parse_marks('X,X,X,X,X,X,X,X,X,X,X,X')
-    expected = [['X']] * 9 + [['X'] * 3]
-    assert_equal expected, marks_by_frame
-  end
-
   def test_score_no_bonus
     game = Game.new('1,5,1,5,1,5,1,5,1,5,1,5,1,5,1,5,1,5,1,5')
     assert_equal 60, game.score

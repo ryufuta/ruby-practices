@@ -4,7 +4,7 @@ require_relative 'frame'
 
 class Game
   def initialize(marks_text)
-    marks_by_frame = self.class.parse_marks(marks_text)
+    marks_by_frame = parse_marks(marks_text)
     @frames = marks_by_frame.map.with_index { |marks, idx| Frame.new(idx, *marks) }
   end
 
@@ -12,7 +12,9 @@ class Game
     @frames.sum { |frame| frame.score(@frames) }
   end
 
-  def self.parse_marks(marks_text)
+  private
+
+  def parse_marks(marks_text)
     marks = marks_text.split(',')
     marks_by_frame = []
     9.times do
