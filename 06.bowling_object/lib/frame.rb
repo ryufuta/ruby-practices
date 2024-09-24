@@ -14,26 +14,6 @@ class Frame
     final? ? score_without_bonus : score_without_bonus + score_bonus(frames)
   end
 
-  def strike?
-    @first_shot.mark == 'X'
-  end
-
-  def spare?
-    @first_shot.mark != 'X' && score_without_bonus == 10
-  end
-
-  def score_first_shot
-    @first_shot.score
-  end
-
-  def score_second_shot
-    @second_shot.score
-  end
-
-  def only_one_shot?
-    @second_shot.mark.nil?
-  end
-
   private
 
   def score_without_bonus
@@ -53,5 +33,27 @@ class Frame
     else
       0
     end
+  end
+
+  def strike?
+    @first_shot.mark == 'X'
+  end
+
+  def spare?
+    @first_shot.mark != 'X' && score_without_bonus == 10
+  end
+
+  protected
+
+  def score_first_shot
+    @first_shot.score
+  end
+
+  def score_second_shot
+    @second_shot.score
+  end
+
+  def only_one_shot?
+    @second_shot.mark.nil?
   end
 end
