@@ -34,11 +34,11 @@ class Frame
   end
 
   def strike?
-    @shots.first.mark == 'X'
+    @shots.first.strike?
   end
 
   def spare?
-    @shots.first.mark != 'X' && score_without_bonus == 10
+    !strike? && score_without_bonus == 10
   end
 
   protected

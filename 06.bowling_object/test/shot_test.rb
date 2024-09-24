@@ -18,4 +18,14 @@ class ShotTest < Minitest::Test
     shot = Shot.new(nil)
     assert_equal 0, shot.score
   end
+
+  def test_strike
+    shot = Shot.new('X')
+    assert shot.strike?
+  end
+
+  def test_not_strike
+    shot = Shot.new('10')
+    refute shot.strike?
+  end
 end
