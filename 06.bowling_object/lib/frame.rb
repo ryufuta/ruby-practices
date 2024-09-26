@@ -9,7 +9,7 @@ class Frame
   end
 
   def score(frames)
-    final? ? score_without_bonus : score_without_bonus + bonus_score(frames)
+    score_without_bonus + bonus_score(frames)
   end
 
   private
@@ -18,11 +18,9 @@ class Frame
     @shots.sum(&:score)
   end
 
-  def final?
-    @idx == 9
-  end
-
   def bonus_score(frames)
+    return 0 if final?
+
     next_frame = frames[@idx + 1]
     if strike?
       next_frame.shot_scores[0] + (next_frame.only_one_shot? ? frames[@idx + 2].shot_scores[0] : next_frame.shot_scores[1])
@@ -31,6 +29,10 @@ class Frame
     else
       0
     end
+  end
+
+  def final?
+    @idx == 9
   end
 
   def strike?
