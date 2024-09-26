@@ -25,9 +25,9 @@ class Frame
   def bonus_score(frames)
     next_frame = frames[@idx + 1]
     if strike?
-      next_frame.score_first_shot + (next_frame.only_one_shot? ? frames[@idx + 2].score_first_shot : next_frame.score_second_shot)
+      next_frame.shot_scores[0] + (next_frame.only_one_shot? ? frames[@idx + 2].shot_scores[0] : next_frame.shot_scores[1])
     elsif spare?
-      next_frame.score_first_shot
+      next_frame.shot_scores[0]
     else
       0
     end
@@ -43,12 +43,8 @@ class Frame
 
   protected
 
-  def score_first_shot
-    @shots.first.score
-  end
-
-  def score_second_shot
-    @shots[1].score
+  def shot_scores
+    @shots.map(&:score)
   end
 
   def only_one_shot?
