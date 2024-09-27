@@ -23,13 +23,19 @@ class Frame
 
     next_frame = frames[@idx + 1]
     if strike?
-      next_frame.shot_scores[0] + (next_frame.only_one_shot? ? frames[@idx + 2].shot_scores[0] : next_frame.shot_scores[1])
+      next_frame.shot_scores[0] + (next_frame.strike? && !next_frame.final? ? frames[@idx + 2].shot_scores[0] : next_frame.shot_scores[1])
     elsif spare?
       next_frame.shot_scores[0]
     else
       0
     end
   end
+
+  def spare?
+    !strike? && score_without_bonus == 10
+  end
+
+  protected
 
   def final?
     @idx == 9
@@ -39,17 +45,7 @@ class Frame
     @shots.first.strike?
   end
 
-  def spare?
-    !strike? && score_without_bonus == 10
-  end
-
-  protected
-
   def shot_scores
     @shots.map(&:score)
-  end
-
-  def only_one_shot?
-    @shots[1].mark.nil?
   end
 end
