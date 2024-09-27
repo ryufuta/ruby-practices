@@ -43,4 +43,19 @@ class FrameTest < Minitest::Test
 
     assert_equal 21, frames.first.score(frames)
   end
+
+  def test_score_double_strike_at_final_two_frames
+    frames = []
+    10.times do |idx|
+      frames << if idx == 8
+                  Frame.new(idx, 'X')
+                elsif idx == 9
+                  Frame.new(idx, 'X', '1', '5')
+                else
+                  Frame.new(idx, '1', '5')
+                end
+    end
+
+    assert_equal 21, frames[8].score(frames)
+  end
 end
