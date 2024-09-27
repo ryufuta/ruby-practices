@@ -16,7 +16,7 @@ class Game
 
   def parse_marks(marks_text)
     marks = marks_text.split(',')
-    9.times.map do
+    Array.new(9) do
       marks.first == 'X' ? marks.shift(1) : marks.shift(2)
     end << marks
   end
