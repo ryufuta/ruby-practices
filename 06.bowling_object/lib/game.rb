@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+require_relative 'shot'
 require_relative 'frame'
 
 class Game
@@ -17,7 +18,7 @@ class Game
   def parse_marks(marks_text)
     marks = marks_text.split(',')
     Array.new(9) do
-      marks.first == 'X' ? marks.shift(1) : marks.shift(2)
+      Shot.new(marks.first).strike? ? marks.shift(1) : marks.shift(2)
     end << marks
   end
 end
