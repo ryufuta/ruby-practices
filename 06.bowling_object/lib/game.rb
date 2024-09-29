@@ -17,8 +17,12 @@ class Game
 
   def parse_marks(marks_text)
     marks = marks_text.split(',')
-    Array.new(9) do
-      Shot.new(marks.first).strike? ? marks.shift(1) : marks.shift(2)
-    end << marks
+    Array.new(10) do |idx|
+      if idx == 9
+        marks
+      else
+        Shot.new(marks.first).strike? ? marks.shift(1) : marks.shift(2)
+      end
+    end
   end
 end
