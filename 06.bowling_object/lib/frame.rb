@@ -12,6 +12,20 @@ class Frame
     score_without_bonus + bonus_score(frames)
   end
 
+  protected
+
+  def final?
+    @idx == 9
+  end
+
+  def strike?
+    @shots.first.strike?
+  end
+
+  def shot_scores
+    @shots.map(&:score)
+  end
+
   private
 
   def score_without_bonus
@@ -38,19 +52,5 @@ class Frame
 
   def spare?
     !strike? && score_without_bonus == 10
-  end
-
-  protected
-
-  def final?
-    @idx == 9
-  end
-
-  def strike?
-    @shots.first.strike?
-  end
-
-  def shot_scores
-    @shots.map(&:score)
   end
 end
