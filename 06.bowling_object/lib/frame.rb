@@ -14,12 +14,8 @@ class Frame
 
   protected
 
-  def final?
-    @idx == 9
-  end
-
   def strike?
-    @shots.first.strike?
+    @shots.size == 1
   end
 
   def shot_scores
@@ -38,7 +34,7 @@ class Frame
     next_frame = frames[@idx + 1]
     if strike?
       next_frame.shot_scores[0] +
-        if next_frame.strike? && !next_frame.final?
+        if next_frame.strike?
           frames[@idx + 2].shot_scores[0]
         else
           next_frame.shot_scores[1]
@@ -48,6 +44,10 @@ class Frame
     else
       0
     end
+  end
+
+  def final?
+    @idx == 9
   end
 
   def spare?
