@@ -3,9 +3,9 @@
 require_relative 'shot'
 
 class Frame
-  def initialize(idx, first_mark, second_mark = nil, third_mark = nil)
+  def initialize(idx, shots)
     @idx = idx
-    @shots = [Shot.new(first_mark), Shot.new(second_mark), Shot.new(third_mark)]
+    @shots = shots
   end
 
   def score(frames)
