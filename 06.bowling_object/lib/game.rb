@@ -5,8 +5,7 @@ require_relative 'frame'
 
 class Game
   def initialize(marks_text)
-    shots_by_frame = parse_marks(marks_text)
-    @frames = shots_by_frame.map.with_index { |shots, idx| Frame.new(idx, shots) }
+    @frames = parse_marks(marks_text)
   end
 
   def score
@@ -20,9 +19,10 @@ class Game
     shots = marks.map { |mark| Shot.new(mark) }
     Array.new(10) do |idx|
       if idx == 9
-        shots
+        Frame.new(idx, shots)
       else
-        shots.first.strike? ? shots.shift(1) : shots.shift(2)
+        shots_in_a_frame = shots.first.strike? ? shots.shift(1) : shots.shift(2)
+        Frame.new(idx, shots_in_a_frame)
       end
     end
   end
