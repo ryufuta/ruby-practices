@@ -25,7 +25,7 @@ class Frame
   private
 
   def score_without_bonus
-    @shots.sum(&:score)
+    shot_scores.sum
   end
 
   def bonus_score(frames)
