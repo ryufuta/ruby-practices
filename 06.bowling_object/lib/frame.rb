@@ -33,12 +33,8 @@ class Frame
 
     next_frame = frames[@idx + 1]
     if strike?
-      next_frame.shot_scores[0] +
-        if next_frame.strike?
-          frames[@idx + 2].shot_scores[0]
-        else
-          next_frame.shot_scores[1]
-        end
+      second_next_shot_score = next_frame.strike? ? frames[@idx + 2].shot_scores[0] : next_frame.shot_scores[1]
+      next_frame.shot_scores[0] + second_next_shot_score
     elsif spare?
       next_frame.shot_scores[0]
     else
