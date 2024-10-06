@@ -38,4 +38,22 @@ class LsCommandTest < Minitest::Test
     TEXT
     assert_equal expected, LsCommand.new(DIR_PATH, reverse: true).run
   end
+
+  def test_run_long_format
+    # Output example
+    # total 40
+    # -rw-r--r--  1 ryufuta  staff   232 Oct  4 18:14 Gemfile
+    # -rw-r--r--  1 ryufuta  staff  3098 Oct  4 18:14 Gemfile.lock
+    # -rw-r--r--  1 ryufuta  staff   429 Dec 10  2023 README.md
+    # -rw-r--r--  1 ryufuta  staff  1787 Oct  4 18:14 app.rb
+    # -rwxr-xr-x  1 ryufuta  staff   279 Oct  4 18:14 dbinit.sh
+    # drwxr-xr-x  3 ryufuta  staff    96 Oct  4 18:14 public
+    # drwxr-xr-x  8 ryufuta  staff   256 Oct  4 18:14 views
+    expected = `ls -l #{DIR_PATH}`.chomp
+    assert_equal expected, LsCommand.new(DIR_PATH, long_format: true).run
+  end
+
+  def test_run_long_format_empty_dir
+    assert_equal 'total 0', LsCommand.new(EMPTY_DIR_PATH, long_format: true).run
+  end
 end
