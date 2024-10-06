@@ -19,4 +19,14 @@ class LsCommandTest < Minitest::Test
   def test_run_empty_dir
     assert_equal '', LsCommand.new(EMPTY_DIR_PATH).run
   end
+
+  def test_run_dot_match
+    expected = <<~TEXT.chomp
+      .               .rubocop.yml    app.rb
+      ..              Gemfile         dbinit.sh
+      .erb-lint.yml   Gemfile.lock    public
+      .gitignore      README.md       views
+    TEXT
+    assert_equal expected, LsCommand.new(DIR_PATH, dot_match: true).run
+  end
 end

@@ -3,8 +3,8 @@
 require_relative 'short_formatter'
 
 class LsCommand
-  def initialize(path)
-    @file_names = collect_file_names(path).freeze
+  def initialize(path, dot_match: false)
+    @file_names = collect_file_names(path, dot_match).freeze
     @formatter = ShortFormatter.new
   end
 
@@ -14,8 +14,8 @@ class LsCommand
 
   private
 
-  def collect_file_names(path)
+  def collect_file_names(path, dot_match)
     file_names = Dir.entries(path).sort
-    file_names.reject { |file_name| file_name[0] == '.' }
+    dot_match ? file_names : file_names.reject { |file_name| file_name[0] == '.' }
   end
 end
