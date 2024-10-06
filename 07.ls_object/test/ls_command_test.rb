@@ -29,4 +29,13 @@ class LsCommandTest < Minitest::Test
     TEXT
     assert_equal expected, LsCommand.new(DIR_PATH, dot_match: true).run
   end
+
+  def test_run_reverse
+    expected = <<~TEXT.chomp
+      views           app.rb          Gemfile
+      public          README.md
+      dbinit.sh       Gemfile.lock
+    TEXT
+    assert_equal expected, LsCommand.new(DIR_PATH, reverse: true).run
+  end
 end
