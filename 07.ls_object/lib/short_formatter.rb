@@ -4,11 +4,11 @@ class ShortFormatter
   COLUMN_WIDTH_UNIT = 8
   N_COLUMNS = 3
 
-  def format(file_names)
+  def format(base_directory)
+    file_names = base_directory.file_names
     return '' if file_names.empty?
 
-    max_name_length = file_names.map(&:size).max
-    column_width = (max_name_length + 1).ceildiv(COLUMN_WIDTH_UNIT) * COLUMN_WIDTH_UNIT
+    column_width = (base_directory.max_file_name_length + 1).ceildiv(COLUMN_WIDTH_UNIT) * COLUMN_WIDTH_UNIT
     n_rows = file_names.size.ceildiv(N_COLUMNS)
     transposed_file_names = safe_transpose(file_names.each_slice(n_rows).to_a)
     to_text(transposed_file_names, column_width)
