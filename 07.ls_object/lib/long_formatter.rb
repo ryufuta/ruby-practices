@@ -35,9 +35,9 @@ class LongFormatter
 
   def format_timestamp(timestamp)
     if Date.parse(timestamp.to_s) > Date.today.prev_month(6)
-      timestamp.strftime('%_2m %_2d %H:%M')
+      timestamp.strftime('%b %_2d %H:%M')
     else
-      timestamp.strftime('%_2m %_2d %_5Y')
+      timestamp.strftime('%b %_2d %_5Y')
     end
   end
 end
