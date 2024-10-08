@@ -17,6 +17,23 @@ class BaseDirectory
     file_names.map(&:size).max
   end
 
+  def file_attributes
+    @file_attributes ||= @files.map(&:attribute)
+  end
+
+  def total_blocks
+    file_attributes.sum(&:blocks)
+  end
+
+  def max_sizes
+    [
+      file_attributes.map(&:nlinks).max.to_s.size,
+      file_attributes.map { |file_attribute| file_attribute.user_name.size }.max,
+      file_attributes.map { |file_attribute| file_attribute.group_name.size }.max,
+      file_attributes.map(&:size).max.to_s.size
+    ]
+  end
+
   private
 
   def collect_file_names(path, dot_match, reverse)
