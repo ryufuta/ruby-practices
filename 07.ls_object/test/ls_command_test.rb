@@ -56,4 +56,9 @@ class LsCommandTest < Minitest::Test
   def test_run_long_format_empty_dir
     assert_equal 'total 0', LsCommand.new(EMPTY_DIR_PATH, long_format: true).run
   end
+
+  def test_run_all_options
+    expected = `ls -alr #{DIR_PATH}`.chomp
+    assert_equal expected, LsCommand.new(DIR_PATH, dot_match: true, long_format: true, reverse: true).run
+  end
 end
