@@ -4,20 +4,20 @@ require 'date'
 
 class LongFormatter
   def format(base_directory)
-    row_data = base_directory.file_attributes
-    return 'total 0' if row_data.empty?
+    file_attributes = base_directory.file_attributes
+    return 'total 0' if file_attributes.empty?
 
     total = "total #{base_directory.total_blocks}"
     max_sizes = base_directory.max_sizes
-    body = format_body(row_data, max_sizes)
+    body = format_body(file_attributes, max_sizes)
     [total, *body].join("\n")
   end
 
   private
 
-  def format_body(row_data, max_sizes)
-    row_data.map do |data|
-      format_row(data, *max_sizes)
+  def format_body(file_attributes, max_sizes)
+    file_attributes.map do |attribute|
+      format_row(attribute, *max_sizes)
     end
   end
 
