@@ -50,10 +50,7 @@ class LsFile
   def type_and_mode_text(mode)
     mode_text = mode.to_s(8).rjust(6, '0')
     type = TYPE_TABLE[mode_text[0, 2]]
-    user_permission = MODE_TABLE[mode_text[3]]
-    group_permission = MODE_TABLE[mode_text[4]]
-    other_permission = MODE_TABLE[mode_text[5]]
-
-    "#{type}#{user_permission}#{group_permission}#{other_permission}"
+    permissions = mode_text[3, 5].gsub(/./, MODE_TABLE)
+    "#{type}#{permissions}"
   end
 end
