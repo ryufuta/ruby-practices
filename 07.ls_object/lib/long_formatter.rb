@@ -5,8 +5,6 @@ require 'date'
 class LongFormatter
   def format(base_directory)
     file_attributes = base_directory.file_attributes
-    return 'total 0' if file_attributes.empty?
-
     total = "total #{base_directory.total_blocks}"
     max_sizes = base_directory.max_sizes
     body = format_body(file_attributes, max_sizes)
