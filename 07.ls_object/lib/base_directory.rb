@@ -3,6 +3,8 @@
 require_relative 'ls_file'
 
 class BaseDirectory
+  attr_reader :files
+
   def initialize(path, dot_match: false, reverse: false)
     @path = path
     file_names = collect_file_names(path, dot_match, reverse)
@@ -17,20 +19,16 @@ class BaseDirectory
     file_names.map(&:size).max
   end
 
-  def file_attributes
-    @file_attributes ||= @files.map(&:attribute)
-  end
-
   def total_blocks
-    file_attributes.sum(&:blocks)
+    files.sum(&:blocks)
   end
 
   def max_sizes
     [
-      file_attributes.map(&:nlinks).max.to_s.size,
-      file_attributes.map { |file_attribute| file_attribute.user_name.size }.max,
-      file_attributes.map { |file_attribute| file_attribute.group_name.size }.max,
-      file_attributes.map(&:size).max.to_s.size
+      files.map(&:nlinks).max.to_s.size,
+      files.map { |file| file.user_name.size }.max,
+      files.map { |file| file.group_name.size }.max,
+      files.map(&:size).max.to_s.size
     ]
   end
 

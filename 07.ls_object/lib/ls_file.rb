@@ -18,27 +18,20 @@ class LsFile
     '7' => 'rwx'
   }.freeze
 
-  Attribute = Data.define(:type_and_mode, :nlinks, :user_name, :group_name, :size, :mtime, :file_name, :blocks)
-
-  attr_reader :name
+  attr_reader :name, :type_and_mode, :nlinks, :user_name, :group_name, :size, :mtime, :blocks
 
   def initialize(parent_path, name)
     @parent_path = parent_path
     @name = name
-  end
 
-  def attribute
     stat = File.lstat(path)
-    Attribute.new(
-      type_and_mode_text(stat.mode),
-      stat.nlink,
-      Etc.getpwuid(stat.uid).name,
-      Etc.getgrgid(stat.gid).name,
-      stat.size,
-      stat.mtime,
-      @name,
-      stat.blocks
-    )
+    @type_and_mode = type_and_mode_text(stat.mode)
+    @nlinks = stat.nlink
+    @user_name = Etc.getpwuid(stat.uid).name
+    @group_name = Etc.getgrgid(stat.gid).name
+    @size = stat.size
+    @mtime = stat.mtime
+    @blocks = stat.blocks
   end
 
   private
